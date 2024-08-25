@@ -1,107 +1,123 @@
 /** @format */
+"use client";
 
-import PageTitle from "@/components/PageTitle";
-import Image from "next/image";
-import { DollarSign, Users, CreditCard, Activity } from "lucide-react";
-import Card, { CardContent, CardProps } from "@/components/Card";
-import BarChart from "@/components/BarChart";
-import SalesCard, { SalesProps } from "@/components/SalesCard";
+import { useState } from "react";
 
-const cardData: CardProps[] = [
-  {
-    label: "Total Revenue",
-    amount: "$45,231.89",
-    discription: "+20.1% from last month",
-    icon: DollarSign
-  },
-  {
-    label: "Subscriptions",
-    amount: "+2350",
-    discription: "+180.1% from last month",
-    icon: Users
-  },
-  {
-    label: "Sales",
-    amount: "+12,234",
-    discription: "+19% from last month",
-    icon: CreditCard
-  },
-  {
-    label: "Active Now",
-    amount: "+573",
-    discription: "+201 since last hour",
-    icon: Activity
-  }
-];
-
-const uesrSalesData: SalesProps[] = [
-  {
-    name: "Olivia Martin",
-    email: "olivia.martin@email.com",
-    saleAmount: "+$1,999.00"
-  },
-  {
-    name: "Jackson Lee",
-    email: "isabella.nguyen@email.com",
-    saleAmount: "+$1,999.00"
-  },
-  {
-    name: "Isabella Nguyen",
-    email: "isabella.nguyen@email.com",
-    saleAmount: "+$39.00"
-  },
-  {
-    name: "William Kim",
-    email: "will@email.com",
-    saleAmount: "+$299.00"
-  },
-  {
-    name: "Sofia Davis",
-    email: "sofia.davis@email.com",
-    saleAmount: "+$39.00"
-  }
-];
-
-export default function Dashboard() {
-  return (
-    <div className="flex flex-col gap-5  w-full">
-      <PageTitle title="Dashboard" />
-      <section className="grid w-full grid-cols-1 gap-4 gap-x-8 transition-all sm:grid-cols-2 xl:grid-cols-4">
-        {cardData.map((d, i) => (
-          <Card
-            key={i}
-            amount={d.amount}
-            discription={d.discription}
-            icon={d.icon}
-            label={d.label}
-          />
-        ))}
-      </section>
-      <section className="grid grid-cols-1  gap-4 transition-all lg:grid-cols-2">
-        <CardContent>
-          <p className="p-4 font-semibold">Overview</p>
-
-          <BarChart />
-        </CardContent>
-        <CardContent className="flex justify-between gap-4">
-          <section>
-            <p>Recent Sales</p>
-            <p className="text-sm text-gray-400">
-              You made 265 sales this month.
-            </p>
-          </section>
-          {uesrSalesData.map((d, i) => (
-            <SalesCard
-              key={i}
-              email={d.email}
-              name={d.name}
-              saleAmount={d.saleAmount}
-            />
-          ))}
-        </CardContent>
-
-        {/*  */}
-      </section>
-    </div>
-  );
+interface Filter {
+    label: string;
 }
+
+interface Influencer {
+    name: string;
+    country: string;
+    platform: string[];
+    language: string;
+    followers: string;
+    growth: string;
+    topics: string[];
+    niche: string;
+}
+
+const Dashboard: React.FC = () => {
+    const [selectedFilters, setSelectedFilters] = useState<Filter[]>([{ label: 'Location: India' }]);
+
+    const handleRemoveFilter = (label: string) => {
+        setSelectedFilters(selectedFilters.filter(filter => filter.label !== label));
+    };
+
+    const influencers: Influencer[] = [
+        {
+            name: 'krilovee',
+            country: 'India',
+            platform: ['Instagram'],
+            language: 'English',
+            followers: '1,260,000',
+            growth: '2.44%',
+            topics: ['Food', 'Lifestyle', 'Travel Guide'],
+            niche: 'Shorts',
+        },
+        {
+            name: 'Tech Logic in Telugu',
+            country: 'India',
+            platform: ['Instagram'],
+            language: 'English',
+            followers: '655,000',
+            growth: '0.61%',
+            topics: ['Apple', 'Technology Design', 'Gadget'],
+            niche: 'Gadget',
+        },
+    ];
+
+    return (
+        <div className="p-8 bg-white text-gray-900">
+            {/* Platform Selector */}
+            <div className="flex space-x-4 mb-6">
+                <button className="py-2 px-4 rounded-md text-white bg-gray-800">Instagram</button>
+            </div>
+
+            {/* Filters Row */}
+            <div className="flex space-x-4 mb-6">
+                <select className="p-2 rounded-md bg-gray-200 border border-gray-300">
+                    <option>Country</option>
+                    <option>India</option>
+                    <option>USA</option>
+                </select>
+                <select className="p-2 rounded-md bg-gray-200 border border-gray-300">
+                    <option>State</option>
+                    <option>Karnataka</option>
+                    <option>California</option>
+                </select>
+                <select className="p-2 rounded-md bg-gray-200 border border-gray-300">
+                    <option>City</option>
+                    <option>Bangalore</option>
+                    <option>San Francisco</option>
+                </select>
+                <select className="p-2 rounded-md bg-gray-200 border border-gray-300">
+                    <option>Category</option>
+                    <option>Tech</option>
+                    <option>Food</option>
+                </select>
+            </div>
+
+            {/* Selected Filters */}
+            <div className="flex space-x-2 mb-6">
+                {selectedFilters.map((filter, index) => (
+                    <div key={index} className="flex items-center space-x-2 bg-gray-200 py-1 px-3 rounded-md">
+                        <span>{filter.label}</span>
+                        <button onClick={() => handleRemoveFilter(filter.label)} className="text-gray-600">✕</button>
+                    </div>
+                ))}
+            </div>
+
+            {/* Profile Count and Search */}
+            <div className="flex justify-between items-center mb-6">
+                <span className="text-gray-600">228,814 users with profiles</span>
+                <button className="py-2 px-4 rounded-md bg-gray-800 text-white">Search</button>
+            </div>
+
+            {/* Influencers List */}
+            <div className="space-y-4">
+                {influencers.map((influencer, index) => (
+                    <div key={index} className="p-4 bg-gray-100 rounded-md flex justify-between items-center">
+                        <div>
+                            <div className="text-xl font-bold">{influencer.name}</div>
+                            <div className="text-sm text-gray-600">{influencer.country}</div>
+                        </div>
+                        <div>
+                            <div className="text-right">{influencer.followers} followers</div>
+                            <div className="text-green-500">{influencer.growth} growth</div>
+                        </div>
+                        <div className="flex space-x-2">
+                            {influencer.topics.map((topic, idx) => (
+                                <span key={idx} className="bg-gray-300 py-1 px-2 rounded-md text-sm">{topic}</span>
+                            ))}
+                        </div>
+                        <div className="text-sm text-gray-600">{influencer.niche}</div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+export default Dashboard;

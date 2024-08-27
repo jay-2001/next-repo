@@ -1,7 +1,7 @@
 /** @format */
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface Filter {
     label: string;
@@ -19,11 +19,70 @@ interface Influencer {
 }
 
 const Dashboard: React.FC = () => {
-    const [selectedFilters, setSelectedFilters] = useState<Filter[]>([{ label: 'Location: India' }]);
+    const [locationFilter, setLocationFilter] = useState<Filter[]>([]);
+    const [followerFilter, setFollowerFilter] = useState<Filter[]>([]);
+    const [categoryFilter, setCategoryFilter] = useState<Filter[]>([]);
 
-    const handleRemoveFilter = (label: string) => {
-        setSelectedFilters(selectedFilters.filter(filter => filter.label !== label));
+    // Temporary options
+    const followerOptions = [
+        "0-1000",
+        "1000-3000",
+        "3000-5000",
+        "5000-10000",
+        "10000-50000",
+        "50000-100000",
+        "100000-500000",
+        "500000-1M",
+        ">1M",
+    ];
+
+    const categoryOptions = ["Tech", "Food", "Lifestyle", "Travel"];
+
+    // Handling removal of filters
+    const handleRemoveFilter = (label: string, type: string) => {
+        if (type === "location") {
+            setLocationFilter(locationFilter.filter(filter => filter.label !== label));
+        } else if (type === "follower") {
+            setFollowerFilter(followerFilter.filter(filter => filter.label !== label));
+        } else if (type === "category") {
+            setCategoryFilter(categoryFilter.filter(filter => filter.label !== label));
+        }
     };
+
+    // Handling selection of location
+    const handleSelectLocation = (label: string) => {
+        if (!locationFilter.some(filter => filter.label === label)) {
+            setLocationFilter([...locationFilter, { label }]);
+        }
+    };
+
+    // Handling selection of follower count
+    const handleSelectFollower = (label: string) => {
+        if (!followerFilter.some(filter => filter.label === label)) {
+            setFollowerFilter([...followerFilter, { label }]);
+        }
+    };
+
+    // Handling selection of category
+    const handleSelectCategory = (label: string) => {
+        if (!categoryFilter.some(filter => filter.label === label)) {
+            setCategoryFilter([...categoryFilter, { label }]);
+        }
+    };
+
+    // Location suggestions (dummy implementation)
+    const [locationSuggestions, setLocationSuggestions] = useState<string[]>([]);
+    const [locationInput, setLocationInput] = useState<string>("");
+
+    useEffect(() => {
+        if (locationInput) {
+            // Call backend API to fetch location suggestions based on locationInput
+            // For now, use dummy data
+            setLocationSuggestions(["India", "Indonesia", "Indore"]);
+        } else {
+            setLocationSuggestions([]);
+        }
+    }, [locationInput]);
 
     const influencers: Influencer[] = [
         {
@@ -57,34 +116,76 @@ const Dashboard: React.FC = () => {
 
             {/* Filters Row */}
             <div className="flex space-x-4 mb-6">
-                <select className="p-2 rounded-md bg-gray-200 border border-gray-300">
-                    <option>Country</option>
-                    <option>India</option>
-                    <option>USA</option>
+                {/* Location Input */}
+                <div className="relative">
+                    <input
+                        type="text"
+                        value={locationInput}
+                        onChange={(e) => setLocationInput(e.target.value)}
+                        placeholder="Enter location"
+                        className="p-2 rounded-md bg-gray-200 border border-gray-300"
+                    />
+                    {locationSuggestions.length > 0 && (
+                        <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 mt-1 rounded-md">
+                            {locationSuggestions.map((suggestion, index) => (
+                                <div
+                                    key={index}
+                                    className="p-2 cursor-pointer hover:bg-gray-100"
+                                    onClick={() => {
+                                        handleSelectLocation(suggestion);
+                                        setLocationInput("");
+                                    }}
+                                >
+                                    {suggestion}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Follower Count Dropdown */}
+                <select
+                    className="p-2 rounded-md bg-gray-200 border border-gray-300"
+                    onChange={(e) => handleSelectFollower(e.target.value)}
+                    defaultValue=""
+                >
+                    <option value="" disabled>Follower Count</option>
+                    {followerOptions.map((option, index) => (
+                        <option key={index} value={option}>{option}</option>
+                    ))}
                 </select>
-                <select className="p-2 rounded-md bg-gray-200 border border-gray-300">
-                    <option>State</option>
-                    <option>Karnataka</option>
-                    <option>California</option>
-                </select>
-                <select className="p-2 rounded-md bg-gray-200 border border-gray-300">
-                    <option>City</option>
-                    <option>Bangalore</option>
-                    <option>San Francisco</option>
-                </select>
-                <select className="p-2 rounded-md bg-gray-200 border border-gray-300">
-                    <option>Category</option>
-                    <option>Tech</option>
-                    <option>Food</option>
+
+                {/* Category Dropdown */}
+                <select
+                    className="p-2 rounded-md bg-gray-200 border border-gray-300"
+                    onChange={(e) => handleSelectCategory(e.target.value)}
+                    defaultValue=""
+                >
+                    <option value="" disabled>Category</option>
+                    {categoryOptions.map((option, index) => (
+                        <option key={index} value={option}>{option}</option>
+                    ))}
                 </select>
             </div>
 
             {/* Selected Filters */}
-            <div className="flex space-x-2 mb-6">
-                {selectedFilters.map((filter, index) => (
+            <div className="flex flex-wrap space-x-2 mb-6">
+                {locationFilter.map((filter, index) => (
                     <div key={index} className="flex items-center space-x-2 bg-gray-200 py-1 px-3 rounded-md">
                         <span>{filter.label}</span>
-                        <button onClick={() => handleRemoveFilter(filter.label)} className="text-gray-600">✕</button>
+                        <button onClick={() => handleRemoveFilter(filter.label, "location")} className="text-gray-600">✕</button>
+                    </div>
+                ))}
+                {followerFilter.map((filter, index) => (
+                    <div key={index} className="flex items-center space-x-2 bg-gray-200 py-1 px-3 rounded-md">
+                        <span>{filter.label}</span>
+                        <button onClick={() => handleRemoveFilter(filter.label, "follower")} className="text-gray-600">✕</button>
+                    </div>
+                ))}
+                {categoryFilter.map((filter, index) => (
+                    <div key={index} className="flex items-center space-x-2 bg-gray-200 py-1 px-3 rounded-md">
+                        <span>{filter.label}</span>
+                        <button onClick={() => handleRemoveFilter(filter.label, "category")} className="text-gray-600">✕</button>
                     </div>
                 ))}
             </div>

@@ -109,97 +109,94 @@ const Dashboard: React.FC = () => {
 
     return (
         <div className="p-8 bg-white text-gray-900">
-            {/* Platform Selector */}
-            <div className="flex space-x-4 mb-6">
-                <button className="py-2 px-4 rounded-md text-white bg-gray-800">Instagram</button>
-            </div>
+            {/* Filters Card */}
+            <div className="flex flex-col p-6 bg-white rounded-lg shadow-lg mb-6 shadow-all-sides">
+                <div className="flex space-x-4 mb-4">
+                    {/* Location Input */}
+                    <div className="relative flex-grow">
+                        <input
+                            type="text"
+                            value={locationInput}
+                            onChange={(e) => setLocationInput(e.target.value)}
+                            placeholder="Enter location"
+                            className="w-full p-2 rounded-md bg-gray-200 border border-gray-300"
+                        />
+                        {locationSuggestions.length > 0 && (
+                            <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 mt-1 rounded-md">
+                                {locationSuggestions.map((suggestion, index) => (
+                                    <div
+                                        key={index}
+                                        className="p-2 cursor-pointer hover:bg-gray-100"
+                                        onClick={() => {
+                                            handleSelectLocation(suggestion);
+                                            setLocationInput("");
+                                        }}
+                                    >
+                                        {suggestion}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
 
-            {/* Filters Row */}
-            <div className="flex space-x-4 mb-6">
-                {/* Location Input */}
-                <div className="relative">
-                    <input
-                        type="text"
-                        value={locationInput}
-                        onChange={(e) => setLocationInput(e.target.value)}
-                        placeholder="Enter location"
-                        className="p-2 rounded-md bg-gray-200 border border-gray-300"
-                    />
-                    {locationSuggestions.length > 0 && (
-                        <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 mt-1 rounded-md">
-                            {locationSuggestions.map((suggestion, index) => (
-                                <div
-                                    key={index}
-                                    className="p-2 cursor-pointer hover:bg-gray-100"
-                                    onClick={() => {
-                                        handleSelectLocation(suggestion);
-                                        setLocationInput("");
-                                    }}
-                                >
-                                    {suggestion}
-                                </div>
-                            ))}
-                        </div>
-                    )}
+                    {/* Follower Count Dropdown */}
+                    <select
+                        className="w-40 p-2 rounded-md bg-gray-200 border border-gray-300"
+                        onChange={(e) => handleSelectFollower(e.target.value)}
+                        defaultValue=""
+                    >
+                        <option value="" disabled>Follower Count</option>
+                        {followerOptions.map((option, index) => (
+                            <option key={index} value={option}>{option}</option>
+                        ))}
+                    </select>
+
+                    {/* Category Dropdown */}
+                    <select
+                        className="w-40 p-2 rounded-md bg-gray-200 border border-gray-300"
+                        onChange={(e) => handleSelectCategory(e.target.value)}
+                        defaultValue=""
+                    >
+                        <option value="" disabled>Category</option>
+                        {categoryOptions.map((option, index) => (
+                            <option key={index} value={option}>{option}</option>
+                        ))}
+                    </select>
                 </div>
 
-                {/* Follower Count Dropdown */}
-                <select
-                    className="p-2 rounded-md bg-gray-200 border border-gray-300"
-                    onChange={(e) => handleSelectFollower(e.target.value)}
-                    defaultValue=""
-                >
-                    <option value="" disabled>Follower Count</option>
-                    {followerOptions.map((option, index) => (
-                        <option key={index} value={option}>{option}</option>
+                {/* Selected Filters */}
+                <div className="flex flex-wrap space-x-2 mb-4">
+                    {locationFilter.map((filter, index) => (
+                        <div key={index} className="flex items-center space-x-2 bg-gray-200 py-1 px-3 rounded-md">
+                            <span>{filter.label}</span>
+                            <button onClick={() => handleRemoveFilter(filter.label, "location")} className="text-gray-600">✕</button>
+                        </div>
                     ))}
-                </select>
-
-                {/* Category Dropdown */}
-                <select
-                    className="p-2 rounded-md bg-gray-200 border border-gray-300"
-                    onChange={(e) => handleSelectCategory(e.target.value)}
-                    defaultValue=""
-                >
-                    <option value="" disabled>Category</option>
-                    {categoryOptions.map((option, index) => (
-                        <option key={index} value={option}>{option}</option>
+                    {followerFilter.map((filter, index) => (
+                        <div key={index} className="flex items-center space-x-2 bg-gray-200 py-1 px-3 rounded-md">
+                            <span>{filter.label}</span>
+                            <button onClick={() => handleRemoveFilter(filter.label, "follower")} className="text-gray-600">✕</button>
+                        </div>
                     ))}
-                </select>
-            </div>
+                    {categoryFilter.map((filter, index) => (
+                        <div key={index} className="flex items-center space-x-2 bg-gray-200 py-1 px-3 rounded-md">
+                            <span>{filter.label}</span>
+                            <button onClick={() => handleRemoveFilter(filter.label, "category")} className="text-gray-600">✕</button>
+                        </div>
+                    ))}
+                </div>
 
-            {/* Selected Filters */}
-            <div className="flex flex-wrap space-x-2 mb-6">
-                {locationFilter.map((filter, index) => (
-                    <div key={index} className="flex items-center space-x-2 bg-gray-200 py-1 px-3 rounded-md">
-                        <span>{filter.label}</span>
-                        <button onClick={() => handleRemoveFilter(filter.label, "location")} className="text-gray-600">✕</button>
-                    </div>
-                ))}
-                {followerFilter.map((filter, index) => (
-                    <div key={index} className="flex items-center space-x-2 bg-gray-200 py-1 px-3 rounded-md">
-                        <span>{filter.label}</span>
-                        <button onClick={() => handleRemoveFilter(filter.label, "follower")} className="text-gray-600">✕</button>
-                    </div>
-                ))}
-                {categoryFilter.map((filter, index) => (
-                    <div key={index} className="flex items-center space-x-2 bg-gray-200 py-1 px-3 rounded-md">
-                        <span>{filter.label}</span>
-                        <button onClick={() => handleRemoveFilter(filter.label, "category")} className="text-gray-600">✕</button>
-                    </div>
-                ))}
-            </div>
-
-            {/* Profile Count and Search */}
-            <div className="flex justify-between items-center mb-6">
-                <span className="text-gray-600">228,814 users with profiles</span>
-                <button className="py-2 px-4 rounded-md bg-gray-800 text-white">Search</button>
+                {/* Profile Count and Search inside Filters Card */}
+                <div className="flex justify-between items-center">
+                    <span className="text-gray-600">228,814 users with profiles</span>
+                    <button className="py-2 px-4 rounded-md bg-gray-800 text-white">Search</button>
+                </div>
             </div>
 
             {/* Influencers List */}
             <div className="space-y-4">
                 {influencers.map((influencer, index) => (
-                    <div key={index} className="p-4 bg-gray-100 rounded-md flex justify-between items-center">
+                    <div key={index} className="p-4 bg-white rounded-lg shadow-all-sides flex justify-between items-center">
                         <div>
                             <div className="text-xl font-bold">{influencer.name}</div>
                             <div className="text-sm text-gray-600">{influencer.country}</div>

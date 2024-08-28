@@ -6,7 +6,7 @@ import Link from 'next/link';
 const Header = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [suggestions, setSuggestions] = useState<string[]>([]);
-    const [isLoggedIn, setIsLoggedIn] = useState(false); // Set based on authentication status
+    const [isLoggedIn, setIsLoggedIn] = useState(false); // Replace with actual auth logic
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value);
@@ -15,25 +15,27 @@ const Header = () => {
     };
 
     return (
-        <header className="flex items-center justify-between p-4 bg-white shadow-md">
-            <div className="flex items-center space-x-4">
+        <header className="fixed top-0 left-0 right-0 flex items-center justify-between p-4 bg-white shadow-md z-10">
+            <div className="flex-grow flex items-center space-x-4">
                 <div className="text-xl font-bold">Dashboard</div>
-                <input
-                    type="text"
-                    className="p-2 border rounded-md"
-                    placeholder="Search profiles..."
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                />
-                {suggestions.length > 0 && (
-                    <ul className="absolute bg-white border rounded-md mt-1 w-full max-w-sm">
-                        {suggestions.map((suggestion, index) => (
-                            <li key={index} className="p-2 hover:bg-gray-200">
-                                {suggestion}
-                            </li>
-                        ))}
-                    </ul>
-                )}
+                <div className="flex-grow">
+                    <input
+                        type="text"
+                        className="w-full p-2 border rounded-md"
+                        placeholder="Search profiles..."
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                    />
+                    {suggestions.length > 0 && (
+                        <ul className="absolute bg-white border rounded-md mt-1 w-full max-w-sm">
+                            {suggestions.map((suggestion, index) => (
+                                <li key={index} className="p-2 hover:bg-gray-200">
+                                    {suggestion}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
             </div>
             <div>
                 {isLoggedIn ? (

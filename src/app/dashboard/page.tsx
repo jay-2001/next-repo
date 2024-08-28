@@ -1,14 +1,13 @@
-import Dashboard from "@/app/dashboard/dashboard"
-import SideNavbar from "@/components/SideNavbar"
+import Dashboard from "@/app/dashboard/dashboard";
 import Header from "../header/Header";
 
 export default function DashboardPage() {
-  return (
-      <div>
-          <Header />
-          <div className="flex">
-              <Dashboard />
-          </div>
-      </div>
-  );
+    return (
+        <div className="min-h-screen flex flex-col">
+            <Header />
+            <div className="flex-1 p-4 pt-20">
+                <Dashboard />
+            </div>
+        </div>
+    );
 }

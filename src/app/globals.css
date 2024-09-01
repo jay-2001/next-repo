@@ -79,3 +79,8 @@
 .shadow-all-sides {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05), 0 -2px 4px rgba(0, 0, 0, 0.05), 2px 0 4px rgba(0, 0, 0, 0.05), -2px 0 4px rgba(0, 0, 0, 0.05);
 }
+
+.follower-count {
+  position: absolute;
+  left: 40%;
+}

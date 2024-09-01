@@ -212,6 +212,19 @@ const Dashboard: React.FC = () => {
     return text;
   };
 
+  const getVisiblePages = () => {
+    const pageWindowSize = 10;
+    let start = 0;
+    let end = Math.min(pageWindowSize, totalPages);
+
+    if (currentPage > 6 && totalPages > pageWindowSize) {
+      start = currentPage - 6;
+      end = Math.min(currentPage + 4, totalPages);
+    }
+
+    return Array.from({ length: end - start }, (_, i) => start + i);
+  };
+
   return (
     <div className="p-8 bg-white text-gray-900">
       {/* Filters Card */}
@@ -332,23 +345,40 @@ const Dashboard: React.FC = () => {
           </div>
         ))}
       </div>
-      {totalPages > 1 && (
-        <div className="mt-6 flex justify-end">
-          {Array.from({ length: totalPages }, (_, index) => (
+      {/* Pagination */}
+      <div className="mt-6 flex justify-center">
+        <nav className="inline-flex ">
+          {currentPage > 0 && (
             <button
-              key={index}
-              onClick={() => handlePageClick(index)}
-              className={`mx-1 px-3 py-1 rounded-md ${
-                currentPage === index
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              onClick={() => handlePageClick(currentPage - 1)}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r-md rounded-l-md hover:bg-gray-50"
+            >
+              &lt;
+            </button>
+          )}
+          {getVisiblePages().map((pageNumber) => (
+            <button
+              key={pageNumber}
+              onClick={() => handlePageClick(pageNumber)}
+              className={`px-4 py-2 text-sm font-medium${
+                pageNumber === currentPage
+                  ? "border border-gray-300 rounded-l-md rounded-r-md bg-gray-500 text-white"
+                  : "bg-white text-gray-700 hover:bg-gray-50"
               }`}
             >
-              {index + 1}
+              {pageNumber + 1}
             </button>
           ))}
-          </div>
-      )}
+          {currentPage < totalPages - 1 && (
+            <button
+              onClick={() => handlePageClick(currentPage + 1)}
+              className="px-4 py-2 text-l font-medium text-gray-700 bg-white border border-gray-300 rounded-l-md rounded-r-md hover:bg-gray-50"
+            >
+              &gt;
+            </button>
+          )}
+        </nav>
+      </div>
     </div>
   );
 };

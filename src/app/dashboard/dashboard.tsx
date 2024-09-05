@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import LoadingOverlay from "../loading/loadingoverlay";
+import InfluencersList from "../InfluncerList/InfluncerList";
 
 interface Filter {
   label: string;
@@ -18,6 +20,7 @@ const Dashboard: React.FC = () => {
   const [locationFilter, setLocationFilter] = useState<Filter[]>([]);
   const [followerFilter, setFollowerFilter] = useState<Filter[]>([]);
   const [categoryFilter, setCategoryFilter] = useState<Filter[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const [influencers, setInfluencers] = useState<Influencer[]>([]);
   const [totalPages, setTotalPages] = useState<number>(1);
@@ -145,64 +148,79 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const handleSearch = async (page: number = 0) => {
-    setCurrentPage(page);
+  const handleSearch = async (page: number = 0, retryCount: number = 2) => {
+    setLoading(true);
+    try{
+      setCurrentPage(page);
 
-    // Build query parameters
-    let queryParams = `page=${page}&size=10`;
-    if (locationFilter.length > 0) {
-      const locationToSearch = locationFilter[0].label.split(",");
-      if(locationToSearch.length == 3)
-      {
-        queryParams+="&city="+locationToSearch[0].toString().trimStart();
-        queryParams+="&state="+locationToSearch[1].toString().trimStart();
-        queryParams+="&country="+locationToSearch[2].toString().trimStart();
+      // Build query parameters
+      let queryParams = `page=${page}&size=10`;
+      if (locationFilter.length > 0) {
+        const locationToSearch = locationFilter[0].label.split(",");
+        if(locationToSearch.length == 3)
+        {
+          queryParams+="&city="+locationToSearch[0].toString().trimStart();
+          queryParams+="&state="+locationToSearch[1].toString().trimStart();
+          queryParams+="&country="+locationToSearch[2].toString().trimStart();
+        }
+        else if(locationToSearch.length == 2)
+        {
+          queryParams+="&state="+locationToSearch[0].toString().trimStart();
+          queryParams+="&country="+locationToSearch[1].toString().trimStart();
+        }
+        else if(locationToSearch.length == 1)
+        {
+          queryParams+="&country="+locationToSearch[0].toString().trimStart();
+        }
       }
-      else if(locationToSearch.length == 2)
-      {
-        queryParams+="&state="+locationToSearch[0].toString().trimStart();
-        queryParams+="&country="+locationToSearch[1].toString().trimStart();
+      
+      if (followerFilter.length > 0) {
+        const [minFollowers, maxFollowers] = followerFilter[0].label.split("-").map((v) => v.replace(">", ""));
+        queryParams+="&minFollowers="+minFollowers;
+        if (maxFollowers) {
+          queryParams+="&maxFollowers="+maxFollowers;
+        }
       }
-      else if(locationToSearch.length == 1)
-      {
-        queryParams+="&country="+locationToSearch[0].toString().trimStart();
-      }
-    }
-    
-    if (followerFilter.length > 0) {
-      const [minFollowers, maxFollowers] = followerFilter[0].label.split("-").map((v) => v.replace(">", ""));
-      queryParams+="&minFollowers="+minFollowers;
-      if (maxFollowers) {
-        queryParams+="&maxFollowers="+maxFollowers;
-      }
-    }
 
-    if (categoryFilter.length > 0) {
-      queryParams+="&categoryNames="+categoryFilter.map((filter) => filter.label).join(",");
-    }
-    console.log(queryParams.toString());
-    try {
-      const response = await fetch(`http://localhost:8080/api/instagram/get/influencer?${queryParams.toString()}`, {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setInfluencers(data.content);
-        setTotalPages(data.totalPages);
-      } else {
-        console.error("Error fetching influencers");
+      if (categoryFilter.length > 0) {
+        queryParams+="&categoryNames="+categoryFilter.map((filter) => filter.label).join(",");
       }
-    } catch (error) {
-      console.error("Error fetching influencers", error);
+      queryParams+="&followerSort=true";
+      try {
+        const response = await fetch(`http://localhost:8080/api/instagram/get/influencer?${queryParams.toString()}`, {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setInfluencers(data.content);
+          setTotalPages(data.totalPages);
+        } else {
+          console.error("Error fetching influencers");
+          if(retryCount<=0)
+          {
+            return;
+          }
+          await new Promise(resolve => setTimeout(resolve, 15000));
+          handleSearch(page, retryCount-1);
+        }
+      } catch (error) {
+        console.error("Error fetching influencers", error);
+      }
+    }
+    catch (error) {
+      console.error('Error fetching influencers:', error);
+    } finally {
+      setLoading(false); // Hide loading overlay
     }
   };
 
   const handlePageClick = (pageNumber: number) => {
-    handleSearch(pageNumber);
+    console.log("called");
+    handleSearch(pageNumber, 2);
   };
 
   const trimText = (text: string, maxLength: number = 16): string => {
@@ -224,6 +242,10 @@ const Dashboard: React.FC = () => {
 
     return Array.from({ length: end - start }, (_, i) => start + i);
   };
+
+  useEffect(() => {
+    handlePageClick(0);
+  }, []);
 
   return (
     <div className="p-8 bg-white text-gray-900">
@@ -323,28 +345,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Influencers List */}
-      <div className="space-y-4">
-        {influencers.map((influencer, index) => (
-          <div key={index} className="p-4 bg-white rounded-lg shadow-all-sides flex justify-between items-center">
-            <div>
-              <div className="text-l font-bold">{trimText(influencer.fullName)}</div>
-              <div className="text-sm text-gray-600">{trimText(influencer.username,18)}</div>
-            </div>
-            <div className="follower-count">
-              <div className="text-right">{influencer.totalFollowerCount} followers</div>
-              {/* <div className="text-green-500">{influencer.growth} growth</div> */}
-            </div>
-            <div className="flex space-x-2">
-              {influencer.categories.map((topic, idx) => (
-                <span key={idx} className="bg-gray-300 py-1 px-2 rounded-md text-sm">
-                  {topic}
-                </span>
-              ))}
-            </div>
-            {/* <div className="text-sm text-gray-600">{influencer.niche}</div> */}
-          </div>
-        ))}
-      </div>
+      <InfluencersList loading={loading} influencers={influencers} trimText={trimText} />
       {/* Pagination */}
       <div className="mt-6 flex justify-center">
         <nav className="inline-flex ">
